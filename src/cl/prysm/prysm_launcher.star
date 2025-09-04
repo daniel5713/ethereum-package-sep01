@@ -358,21 +358,21 @@ def get_beacon_config(
     #    "tty_enabled": True,
     #}
 
-    if should_use_native_entrypoint(participant.cl_image):
+    #if should_use_native_entrypoint(participant.cl_image):
         # Use native Prysm entrypoint for custom images
-        entrypoint = [PRYSM_ENTRYPOINT_COMMAND]
-        cmd = cmd
-    else:
+    #    entrypoint = [PRYSM_ENTRYPOINT_COMMAND]
+    #    cmd = cmd
+    #else:
         # Use shell wrapper for default images (existing behavior)
-        entrypoint = ["sh", "-c"]
-        cmd = ["exec " + " ".join(cmd)]
+    #    entrypoint = ["sh", "-c"]
+    #    cmd = ["exec " + " ".join(cmd)]
 
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "entrypoint": [PRYSM_ENTRYPOINT_COMMAND],  # ← FIXED: Use native entrypoint
-        "cmd": cmd,  # ← FIXED: Use command directly
+        "entrypoint": [PRYSM_ENTRYPOINT_COMMAND],  # ← ALWAYS use native entrypoint
+        "cmd": cmd,  # ← ALWAYS use command directly
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
