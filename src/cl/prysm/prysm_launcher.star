@@ -372,7 +372,7 @@ def get_beacon_config(
         "ports": used_ports,
         "public_ports": public_ports,
         "entrypoint": [PRYSM_ENTRYPOINT_COMMAND],  # ← CRITICAL: Add this line
-        "cmd": [PRYSM_ENTRYPOINT_COMMAND] + cmd,  # Binary name + arguments
+        "cmd": cmd,  # Binary name + arguments
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
