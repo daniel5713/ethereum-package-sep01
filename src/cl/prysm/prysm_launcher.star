@@ -208,7 +208,7 @@ def get_beacon_config(
     used_ports = shared_utils.get_port_specs(used_port_assignments)
 
     cmd = [
-        PRYSM_ENTRYPOINT_COMMAND,
+        #PRYSM_ENTRYPOINT_COMMAND,
         "--accept-terms-of-use=true",  # it's mandatory in order to run the node
         "--datadir=" + BEACON_DATA_DIRPATH_ON_SERVICE_CONTAINER,
         "--execution-endpoint=" + EXECUTION_ENGINE_ENDPOINT,
