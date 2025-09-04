@@ -371,8 +371,8 @@ def get_beacon_config(
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "entrypoint": entrypoint,  # ← Dynamic entrypoint
-        "cmd": cmd,                # ← Dynamic command
+        "entrypoint": [PRYSM_ENTRYPOINT_COMMAND],  # ← FIXED: Use native entrypoint
+        "cmd": cmd,  # ← FIXED: Use command directly
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
