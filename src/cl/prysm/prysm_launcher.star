@@ -30,6 +30,23 @@ VERBOSITY_LEVELS = {
     constants.GLOBAL_LOG_LEVEL.trace: "trace",
 }
 
+def should_use_native_entrypoint(cl_image):
+    """
+    Determine if we should use the native Prysm entrypoint instead of shell wrapper.
+    This ensures custom Prysm images work correctly.
+    """
+    # If no custom image specified, use default behavior
+    if not cl_image or cl_image == "":
+        return False
+    
+    # If it's the official Prysm image, use default behavior
+    if cl_image == "gcr.io/offchainlabs/prysm/beacon-chain:latest":
+        return False
+    
+    # For custom images, use native entrypoint to avoid shell wrapper issues
+    return True
+
+
 
 def launch(
     plan,
@@ -315,12 +332,47 @@ def get_beacon_config(
     for mount_path, artifact in processed_mounts.items():
         files[mount_path] = artifact
 
+    #config_args = {
+    #    "image": participant.cl_image,
+    #    "ports": used_ports,
+    #    "public_ports": public_ports,
+    #    "entrypoint": ["sh", "-c"],
+    #    "cmd": ["exec " + " ".join(cmd)],
+    #    "files": files,
+    #    "env_vars": participant.cl_extra_env_vars,
+    #    "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
+    #    "ready_conditions": cl_node_ready_conditions.get_ready_conditions(
+    #        constants.HTTP_PORT_ID
+    #    ),
+    #    "labels": shared_utils.label_maker(
+    #        client=constants.CL_TYPE.prysm,
+    #        client_type=constants.CLIENT_TYPES.cl,
+    #        image=participant.cl_image[-constants.MAX_LABEL_LENGTH :],
+    #        connected_client=el_context.client_name,
+    #        extra_labels=participant.cl_extra_labels
+    #        | {constants.NODE_INDEX_LABEL_KEY: str(participant_index + 1)},
+    #        supernode=participant.supernode,
+    #    ),
+    #    "tolerations": tolerations,
+    #    "node_selectors": node_selectors,
+    #    "tty_enabled": True,
+    #}
+
+    if should_use_native_entrypoint(participant.cl_image):
+        # Use native Prysm entrypoint for custom images
+        entrypoint = [PRYSM_ENTRYPOINT_COMMAND]
+        cmd = cmd
+    else:
+        # Use shell wrapper for default images (existing behavior)
+        entrypoint = ["sh", "-c"]
+        cmd = ["exec " + " ".join(cmd)]
+
     config_args = {
         "image": participant.cl_image,
         "ports": used_ports,
         "public_ports": public_ports,
-        "entrypoint": ["sh", "-c"],
-        "cmd": ["exec " + " ".join(cmd)],
+        "entrypoint": entrypoint,  # ← Dynamic entrypoint
+        "cmd": cmd,                # ← Dynamic command
         "files": files,
         "env_vars": participant.cl_extra_env_vars,
         "private_ip_address_placeholder": constants.PRIVATE_IP_ADDRESS_PLACEHOLDER,
@@ -340,6 +392,9 @@ def get_beacon_config(
         "node_selectors": node_selectors,
         "tty_enabled": True,
     }
+
+
+
 
     if int(participant.cl_min_cpu) > 0:
         config_args["min_cpu"] = int(participant.cl_min_cpu)
